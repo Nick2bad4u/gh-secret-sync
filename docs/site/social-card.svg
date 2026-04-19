@@ -1,35 +1,51 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
   <defs>
-    <linearGradient id="bg" x1="72" y1="40" x2="1104" y2="588" gradientUnits="userSpaceOnUse">
+    <linearGradient id="bg" x1="76" y1="44" x2="1128" y2="592" gradientUnits="userSpaceOnUse">
       <stop stop-color="#0D1830" />
       <stop offset="1" stop-color="#07111F" />
     </linearGradient>
-    <linearGradient id="panel" x1="748" y1="132" x2="1044" y2="426" gradientUnits="userSpaceOnUse">
+    <linearGradient id="panel" x1="96" y1="96" x2="1138" y2="552" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#151F37" />
+      <stop offset="1" stop-color="#101A30" />
+    </linearGradient>
+    <linearGradient id="accent" x1="94" y1="102" x2="204" y2="214" gradientUnits="userSpaceOnUse">
       <stop stop-color="#7AA2FF" />
       <stop offset="1" stop-color="#6D54FF" />
     </linearGradient>
   </defs>
+
   <rect width="1200" height="630" fill="url(#bg)" />
-  <circle cx="1090" cy="104" r="180" fill="#4F7CFF" fill-opacity=".12" />
-  <circle cx="172" cy="-12" r="220" fill="#5EC7FF" fill-opacity=".08" />
-  <rect x="72" y="76" width="1056" height="478" rx="28" fill="#111A30" fill-opacity=".92" stroke="#89A6DF" stroke-opacity=".22" />
+  <circle cx="1090" cy="88" r="190" fill="#4F7CFF" fill-opacity=".12" />
+  <circle cx="158" cy="-24" r="230" fill="#5EC7FF" fill-opacity=".08" />
+
+  <rect x="72" y="76" width="1056" height="478" rx="28" fill="url(#panel)" stroke="#89A6DF" stroke-opacity=".22" />
+
   <g>
-    <rect x="92" y="102" width="92" height="92" rx="24" fill="url(#panel)" />
-    <path d="M119 127h38" stroke="#D7E3FF" stroke-width="7" stroke-linecap="round" />
-    <path d="M126 127l4-7h17l4 7" stroke="#D7E3FF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M123 135h29l-4 30.5a6 6 0 0 1-5.96 5.5h-9.08a6 6 0 0 1-5.96-5.5L123 135Z" fill="#F6FAFF" />
-    <path d="M134 142v20M142 142v20" stroke="#5A6DAD" stroke-width="5" stroke-linecap="round" />
+    <rect x="92" y="102" width="96" height="96" rx="24" fill="url(#accent)" />
+    <rect x="117" y="124" width="46" height="52" rx="12" fill="#F4F8FF" />
+    <path d="M129 139c0-6.6 5.4-12 12-12s12 5.4 12 12v5h-7v-5a5 5 0 0 0-10 0v5h-7v-5Z" fill="#667DC0" />
+    <circle cx="140" cy="152" r="3.8" fill="#45598F" />
+    <rect x="138.2" y="154.4" width="3.6" height="7.2" rx="1.8" fill="#45598F" />
+    <path d="M98 148h12" stroke="#EAF1FF" stroke-width="4.5" stroke-linecap="round" />
+    <path d="M106 143.5l5 4.5-5 4.5" stroke="#EAF1FF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
   </g>
-  <text x="212" y="145" fill="#6EA8FF" font-size="28" font-family="Inter,Segoe UI,Arial,sans-serif" font-weight="700" letter-spacing="5.2">GITHUB CLI EXTENSION</text>
-  <text x="92" y="250" fill="#EFF4FF" font-size="72" font-family="Inter,Segoe UI,Arial,sans-serif" font-weight="800">gh-runs-cleanup</text>
-  <text x="92" y="318" fill="#B3C1E0" font-size="31" font-family="Inter,Segoe UI,Arial,sans-serif">Safely bulk-delete GitHub Actions workflow runs with dry-run previews,</text>
-  <text x="92" y="360" fill="#B3C1E0" font-size="31" font-family="Inter,Segoe UI,Arial,sans-serif">explicit confirmation, filters, retry handling, and JSON output.</text>
+
+  <text x="212" y="144" fill="#6EA8FF" font-size="24" font-family="Inter,Segoe UI,Arial,sans-serif" font-weight="700" letter-spacing="3.2">GITHUB CLI EXTENSION</text>
+  <text x="92" y="244" fill="#EFF4FF" font-size="78" font-family="Inter,Segoe UI,Arial,sans-serif" font-weight="800">gh-secret-sync</text>
+
+  <text x="92" y="312" fill="#B3C1E0" font-size="30" font-family="Inter,Segoe UI,Arial,sans-serif">Safely bulk-sync repository, environment, and organization secrets with</text>
+  <text x="92" y="352" fill="#B3C1E0" font-size="30" font-family="Inter,Segoe UI,Arial,sans-serif">dry-run previews, confirmation gates, and JSON/CSV plan support.</text>
+
   <g>
-    <rect x="92" y="420" width="272" height="54" rx="18" fill="#182541" stroke="#89A6DF" stroke-opacity=".22" />
-    <text x="120" y="454" fill="#EFF4FF" font-size="24" font-family="Inter,Segoe UI,Arial,sans-serif" font-weight="700">Dry-run first</text>
-    <rect x="386" y="420" width="264" height="54" rx="18" fill="#182541" stroke="#89A6DF" stroke-opacity=".22" />
-    <text x="414" y="454" fill="#EFF4FF" font-size="24" font-family="Inter,Segoe UI,Arial,sans-serif" font-weight="700">Retry-aware</text>
-    <rect x="672" y="420" width="290" height="54" rx="18" fill="#182541" stroke="#89A6DF" stroke-opacity=".22" />
-    <text x="700" y="454" fill="#EFF4FF" font-size="24" font-family="Inter,Segoe UI,Arial,sans-serif" font-weight="700">Machine-readable JSON</text>
+    <rect x="92" y="418" width="246" height="56" rx="18" fill="#1A2845" stroke="#89A6DF" stroke-opacity=".22" />
+    <text x="120" y="453" fill="#EFF4FF" font-size="24" font-family="Inter,Segoe UI,Arial,sans-serif" font-weight="700">Dry-run first</text>
+
+    <rect x="360" y="418" width="278" height="56" rx="18" fill="#1A2845" stroke="#89A6DF" stroke-opacity=".22" />
+    <text x="388" y="453" fill="#EFF4FF" font-size="24" font-family="Inter,Segoe UI,Arial,sans-serif" font-weight="700">JSON + CSV plans</text>
+
+    <rect x="660" y="418" width="324" height="56" rx="18" fill="#1A2845" stroke="#89A6DF" stroke-opacity=".22" />
+    <text x="688" y="453" fill="#EFF4FF" font-size="24" font-family="Inter,Segoe UI,Arial,sans-serif" font-weight="700">Secure input options</text>
   </g>
+
+  <text x="92" y="520" fill="#8FA1C9" font-size="22" font-family="Inter,Segoe UI,Arial,sans-serif">Nick2bad4u/gh-secret-sync</text>
 </svg>

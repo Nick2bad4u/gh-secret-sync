@@ -1,19 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
   <defs>
-    <linearGradient id="bg" x1="16" y1="14" x2="112" y2="114" gradientUnits="userSpaceOnUse">
+    <linearGradient id="logo-bg" x1="14" y1="10" x2="114" y2="118" gradientUnits="userSpaceOnUse">
       <stop stop-color="#7AA2FF" />
       <stop offset="1" stop-color="#6D54FF" />
     </linearGradient>
-    <linearGradient id="accent" x1="42" y1="34" x2="85" y2="92" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FFFFFF" />
-      <stop offset="1" stop-color="#DCE7FF" />
+    <linearGradient id="logo-panel" x1="36" y1="30" x2="89" y2="99" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FBFF" />
+      <stop offset="1" stop-color="#D9E6FF" />
     </linearGradient>
   </defs>
-  <rect x="10" y="10" width="108" height="108" rx="28" fill="url(#bg)" />
-  <path d="M42 39h44" stroke="#D7E3FF" stroke-width="8" stroke-linecap="round" />
-  <path d="M50 39l4-7h20l4 7" stroke="#D7E3FF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
-  <path d="M47 47h34l-4.5 39.5a8 8 0 0 1-7.95 7.1H59.45a8 8 0 0 1-7.95-7.1L47 47Z" fill="url(#accent)" />
-  <path d="M60 56v27M69 56v27" stroke="#5A6DAD" stroke-width="6" stroke-linecap="round" />
-  <path d="M91 24l2.2 6.8L100 33l-6.8 2.2L91 42l-2.2-6.8L82 33l6.8-2.2L91 24Z" fill="#F8FBFF" />
-  <path d="M34 74l1.6 4.9 4.9 1.6-4.9 1.6-1.6 4.9-1.6-4.9-4.9-1.6 4.9-1.6 1.6-4.9Z" fill="#F8FBFF" opacity=".85" />
+
+  <rect x="10" y="10" width="108" height="108" rx="28" fill="url(#logo-bg)" />
+
+  <rect x="34" y="30" width="60" height="68" rx="16" fill="url(#logo-panel)" />
+
+  <path d="M51 52c0-8.3 6.7-15 15-15s15 6.7 15 15v8h-9v-8a6 6 0 1 0-12 0v8h-9v-8Z" fill="#6A7FC2" />
+  <circle cx="66" cy="69" r="5" fill="#4A5D95" />
+  <rect x="63.5" y="72" width="5" height="10" rx="2.5" fill="#4A5D95" />
+
+  <path d="M22 58a1 1 0 0 1 1-1h11" stroke="#EAF1FF" stroke-width="5" stroke-linecap="round" />
+  <path d="M30 53l5 4.8-5 4.8" stroke="#EAF1FF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+
+  <path d="M106 70a1 1 0 0 1-1 1H94" stroke="#EAF1FF" stroke-width="5" stroke-linecap="round" />
+  <path d="M98 65.2L93 70l5 4.8" stroke="#EAF1FF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+
+  <circle cx="96" cy="30" r="6" fill="#F8FBFF" fill-opacity=".92" />
+  <circle cx="31" cy="97" r="4" fill="#F8FBFF" fill-opacity=".75" />
 </svg>
