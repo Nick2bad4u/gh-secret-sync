@@ -1,33 +1,33 @@
 {
     "$schema": "https://www.schemastore.org/package.json",
-    "name": "gh-runs-cleanup",
+    "name": "gh-secret-sync",
     "version": "1.0.0",
     "private": true,
-    "description": "GitHub CLI extension to bulk-delete workflow runs with safe filters.",
+    "description": "GitHub CLI extension to safely sync secrets across repositories, environments, and org targets.",
     "keywords": [
         "gh",
         "gh-extension",
         "github-actions",
-        "workflow-runs",
-        "cleanup"
+        "secrets",
+        "secret-sync"
     ],
-    "homepage": "https://github.com/Nick2bad4u/gh-runs-cleanup",
+    "homepage": "https://github.com/Nick2bad4u/gh-secret-sync",
     "bugs": {
-        "url": "https://github.com/Nick2bad4u/gh-runs-cleanup/issues"
+        "url": "https://github.com/Nick2bad4u/gh-secret-sync/issues"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Nick2bad4u/gh-runs-cleanup.git"
+        "url": "git+https://github.com/Nick2bad4u/gh-secret-sync.git"
     },
     "license": "MIT",
     "author": "Nick2bad4u <20943337+Nick2bad4u@users.noreply.github.com> (https://github.com/Nick2bad4u)",
     "type": "module",
     "bin": {
-        "gh-runs-cleanup": "./gh-runs-cleanup"
+        "gh-secret-sync": "./gh-secret-sync"
     },
     "files": [
-        "cleanup-workflow-runs.mjs",
-        "gh-runs-cleanup",
+        "sync-secrets.mjs",
+        "gh-secret-sync",
         "src",
         "README.md",
         "LICENSE"

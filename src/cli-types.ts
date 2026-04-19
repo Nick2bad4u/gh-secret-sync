@@ -62,6 +62,39 @@ export type Styler = {
     arg: (text: string) => string;
 };
 
+export type SecretTarget =
+    | {
+          environment?: string;
+          kind: "repo";
+          repo: string;
+      }
+    | {
+          kind: "org";
+          org: string;
+          selectedRepos?: string[];
+          visibility?: "all" | "private" | "selected";
+      };
+
+export type SecretOperation = {
+    secretName: string;
+    target: SecretTarget;
+    value: string;
+};
+
+export type SecretOperationResult = {
+    error?: string;
+    operation: SecretOperation;
+    ok: boolean;
+};
+
+export type SecretRunSummary = {
+    applied: number;
+    dryRun: boolean;
+    failed: number;
+    results: SecretOperationResult[];
+    total: number;
+};
+
 export const VALID_STATUSES = new Set([
     "queued",
     "completed",

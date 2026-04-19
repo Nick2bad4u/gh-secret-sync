@@ -7,7 +7,7 @@ type HelpOption = {
 };
 
 type HelpSection = {
-    options?: HelpOption[];
+    options: HelpOption[];
     title: string;
 };
 
@@ -15,211 +15,157 @@ const HELP_SECTIONS: HelpSection[] = [
     {
         options: [
             {
-                arg: "<owner/name>",
                 description:
-                    "Target repository (optional if run inside a repo)",
-                flag: "--repo",
-            },
-            {
-                arg: "<owner/name[,..]>",
-                description: "Multiple target repositories (repeatable)",
-                flag: "--repos",
-            },
-            {
-                description: "Target all repositories for an owner/login",
-                flag: "--all-repos",
-            },
-            {
-                arg: "<login>",
-                description:
-                    "Owner/login used with --all-repos (default: authenticated user)",
-                flag: "--owner",
-            },
-        ],
-        title: "Target repository",
-    },
-    {
-        options: [
-            {
-                arg: "<value[,value...]>",
-                description:
-                    "Run statuses to target (repeatable; default: failure,cancelled)",
-                flag: "--status",
-            },
-            {
-                description: "Target all valid statuses",
-                flag: "--all-statuses",
-            },
-            {
-                arg: "<name|id>",
-                description: "Filter by workflow name or id",
-                flag: "--workflow",
-            },
-            {
-                arg: "<name[,name...]>",
-                description: "Exclude matching workflow names (repeatable)",
-                flag: "--exclude-workflow",
-            },
-            {
-                arg: "<name>",
-                description: "Filter by branch",
-                flag: "--branch",
-            },
-            {
-                arg: "<name[,name...]>",
-                description: "Exclude matching branch names (repeatable)",
-                flag: "--exclude-branch",
-            },
-            {
-                arg: "<event>",
-                description: "Filter by triggering event",
-                flag: "--event",
-            },
-            {
-                arg: "<login>",
-                description: "Filter by actor",
-                flag: "--user",
-            },
-            {
-                arg: "<sha>",
-                description: "Filter by commit SHA",
-                flag: "--commit",
-            },
-            {
-                arg: "<date>",
-                description: "GitHub created-date filter (same as gh run list)",
-                flag: "--created",
-            },
-            {
-                arg: "<n>",
-                description: "Only delete runs older than N days",
-                flag: "--before-days",
-            },
-            {
-                arg: "<n>",
-                description: "Max runs to fetch per status (default: 500)",
-                flag: "--limit",
-            },
-            {
-                arg: "<n>",
-                description: "Safety cap on number of deletions",
-                flag: "--max-delete",
-            },
-            {
-                arg: "<oldest|newest|none>",
-                description: "Processing order (default: oldest)",
-                flag: "--order",
-            },
-        ],
-        title: "Filters",
-    },
-    {
-        options: [
-            {
-                description: "Show what would be deleted without deleting",
+                    "Dry-run mode (default). Prints planned writes without calling gh secret set.",
                 flag: "--dry-run",
             },
             {
-                description: "Required to perform deletion",
+                description:
+                    "Required to actually write secrets. Alias: --yes.",
                 flag: "--confirm",
             },
             {
-                description: "Alias for --confirm",
+                description: "Alias for --confirm.",
                 flag: "--yes",
             },
             {
-                arg: "<n>",
-                description: "Delete retry attempts (default: 2)",
-                flag: "--max-retries",
-            },
-            {
-                arg: "<n>",
-                description: "Initial retry delay in ms (default: 200)",
-                flag: "--retry-delay-ms",
-            },
-            {
-                description: "Stop deleting after first failed run",
-                flag: "--fail-fast",
-            },
-            {
-                arg: "<n>",
-                description: "Stop after N failed deletions",
-                flag: "--max-failures",
-            },
-            {
-                description: "Show per-run details",
-                flag: "--verbose",
-            },
-            {
-                description: "Show expanded summaries (tables, grouped counts)",
-                flag: "--summary",
-            },
-            {
-                description: "Reduce non-error output in text mode",
-                flag: "--quiet",
-            },
-        ],
-        title: "Execution",
-    },
-    {
-        options: [
-            {
-                description: "Emit structured JSON output",
+                description: "Emit machine-readable JSON summary.",
                 flag: "--json",
             },
             {
-                arg: "<auto|always|never>",
-                description: "Color mode for text output (default: auto)",
-                flag: "--color",
-            },
-            {
-                description: "Alias for --color never",
-                flag: "--no-color",
-            },
-            {
-                arg: "<auto|always|never>",
-                description: "Unicode table borders/symbols (default: auto)",
-                flag: "--unicode",
-            },
-            {
-                description: "Alias for --unicode never",
-                flag: "--no-unicode",
-            },
-            {
-                description: "Disable progress bars in interactive terminals",
-                flag: "--no-progress",
-            },
-            {
-                description:
-                    "CI-friendly output (disables interactive formatting)",
-                flag: "--ci",
+                description: "Reduce non-error text output.",
+                flag: "--quiet",
             },
         ],
-        title: "Output",
+        title: "Safety and output",
     },
     {
         options: [
             {
-                description: "Show this help",
+                arg: "<owner/name>",
+                description:
+                    "Single repository target. If omitted, current repo is auto-resolved.",
+                flag: "--repo",
+            },
+            {
+                arg: "<owner/name[,owner/name...]>",
+                description: "Multiple repository targets (repeatable).",
+                flag: "--repos",
+            },
+            {
+                arg: "<path>",
+                description:
+                    "Text file with one repo slug per line (# comments allowed).",
+                flag: "--repo-file",
+            },
+            {
+                arg: "<environment>",
+                description:
+                    "Set repository environment secret instead of repository-level secret.",
+                flag: "--env",
+            },
+        ],
+        title: "Repository targets",
+    },
+    {
+        options: [
+            {
+                arg: "<name>",
+                description: "Secret name for single-secret mode.",
+                flag: "--secret-name",
+            },
+            {
+                arg: "<value>",
+                description: "Secret value for single-secret mode.",
+                flag: "--secret-value",
+            },
+            {
+                arg: "<ENV_VAR>",
+                description:
+                    "Read secret value from an environment variable in the current shell.",
+                flag: "--secret-value-env",
+            },
+            {
+                arg: "<path>",
+                description:
+                    "Read secret value from a file (full file content is used).",
+                flag: "--secret-value-file",
+            },
+            {
+                description:
+                    "Prompt once for a hidden secret value in an interactive terminal.",
+                flag: "--secret-value-prompt",
+            },
+            {
+                description:
+                    "Read the secret value from stdin once (best for avoiding shell history).",
+                flag: "--secret-value-stdin",
+            },
+            {
+                arg: "<NAME=VALUE>",
+                description:
+                    "Add a secret inline (repeatable) for bulk mode across the same targets.",
+                flag: "--set",
+            },
+            {
+                arg: "<NAME=ENV_VAR>",
+                description:
+                    "Add a secret where value is read from environment variable (repeatable).",
+                flag: "--set-env",
+            },
+        ],
+        title: "CLI input modes",
+    },
+    {
+        options: [
+            {
+                arg: "<path>",
+                description:
+                    "JSON or CSV plan file for mixed target operations (repo/env/org in one run).",
+                flag: "--plan-file",
+            },
+            {
+                arg: "<json|csv>",
+                description:
+                    "Optional plan format override when the file extension is ambiguous.",
+                flag: "--plan-format",
+            },
+            {
+                arg: "<org>",
+                description:
+                    "Organization target for single-secret mode (uses gh secret set --org).",
+                flag: "--org",
+            },
+            {
+                arg: "<all|private|selected>",
+                description:
+                    "Organization secret visibility in single-secret mode.",
+                flag: "--org-visibility",
+            },
+            {
+                arg: "<owner/name[,owner/name...]>",
+                description:
+                    "Selected repositories for organization secret in single-secret mode.",
+                flag: "--org-selected-repos",
+            },
+            {
+                description: "Show help.",
                 flag: "--help",
             },
         ],
-        title: "Help",
+        title: "Plan mode and org mode",
     },
 ];
 
-const HELP_NOTES = [
-    "--workflow uses compatibility mode, so progress may update less frequently.",
-];
-
 const HELP_EXAMPLES = [
-    "gh runs-cleanup --repo owner/repo --confirm",
-    "gh runs-cleanup --repos owner/repo,owner/other-repo --dry-run",
-    "gh runs-cleanup --all-repos --owner my-user --status failure --confirm",
-    "gh runs-cleanup --repo owner/repo --status failure,cancelled --limit 500 --confirm",
-    'gh runs-cleanup --repo owner/repo --workflow "CI" --branch main --dry-run',
-    "gh runs-cleanup --repo owner/repo --json --dry-run",
-    "gh runs-cleanup --before-days 30 --status failure --confirm",
+    "gh secret-sync --repo owner/repo --secret-name API_KEY --secret-value-env API_KEY --confirm",
+    "gh secret-sync --repo owner/repo --secret-name API_KEY --secret-value-prompt --confirm",
+    "Get-Content ./secrets/api_key.txt | gh secret-sync --repo owner/repo --secret-name API_KEY --secret-value-stdin --confirm",
+    "gh secret-sync --repos owner/a,owner/b --env production --set TOKEN=$TOKEN --set-env URL=DEPLOY_URL --confirm",
+    "gh secret-sync --repo-file repos.txt --secret-name NPM_TOKEN --secret-value-file ./.secrets/npm_token.txt --dry-run",
+    "gh secret-sync --org my-org --secret-name SHARED --secret-value-env SHARED --org-visibility private --confirm",
+    "gh secret-sync --plan-file ./secret-plan.json --confirm --json",
+    "gh secret-sync --plan-file ./secret-plan.csv --plan-format csv --confirm",
 ];
 
 function styleCommandExample(command: string, styler?: Styler): string {
@@ -247,55 +193,65 @@ export function buildHelpText(styler?: Styler): string {
     const title = (text: string): string =>
         styler ? styler.heading(text) : text;
 
-    const optionLabelWidths = HELP_SECTIONS.flatMap((section) =>
-        (section.options ?? []).map(
-            (option) =>
-                `${option.flag}${option.arg ? ` ${option.arg}` : ""}`.length
-        )
+    const maxLabelWidth = Math.max(
+        ...HELP_SECTIONS.flatMap((section) =>
+            section.options.map(
+                (option) =>
+                    `${option.flag}${option.arg ? ` ${option.arg}` : ""}`.length
+            )
+        ),
+        0
     );
-    const maxLabelWidth = Math.max(...optionLabelWidths, 0);
 
     const lines: string[] = [];
-    lines.push(title("gh-runs-cleanup"));
+    lines.push(title("gh-secret-sync"));
     lines.push("");
-    lines.push("  Delete GitHub Actions workflow runs using the gh CLI.");
-    lines.push("");
-    lines.push(heading("  Usage:"));
-    lines.push(
-        `    ${styleCommandExample("gh runs-cleanup", styler)} ${arg("[options]")}`
-    );
+    lines.push(heading("Usage"));
+    lines.push(`  gh secret-sync [options]`);
     lines.push("");
 
     for (const section of HELP_SECTIONS) {
-        lines.push(heading(`  ${section.title}:`));
-        for (const option of section.options ?? []) {
-            const labelPlain = `${option.flag}${option.arg ? ` ${option.arg}` : ""}`;
-            const labelStyled = `${flag(option.flag)}${option.arg ? ` ${arg(option.arg)}` : ""}`;
-            const spacing = " ".repeat(maxLabelWidth - labelPlain.length + 2);
-            lines.push(`    ${labelStyled}${spacing}${option.description}`);
+        lines.push(title(section.title));
+        for (const option of section.options) {
+            const label = `${flag(option.flag)}${option.arg ? ` ${arg(option.arg)}` : ""}`;
+            const plainLabel = `${option.flag}${option.arg ? ` ${option.arg}` : ""}`;
+            const padding = " ".repeat(
+                Math.max(1, maxLabelWidth - plainLabel.length + 2)
+            );
+            lines.push(`  ${label}${padding}${option.description}`);
         }
         lines.push("");
     }
 
-    lines.push(heading("  Notes:"));
-    for (const note of HELP_NOTES) {
-        lines.push(`    ${styleCommandExample(note, styler)}`);
-    }
+    lines.push(heading("Plan file format (JSON)"));
+    lines.push(
+        '  [ { "target": "repo"|"env"|"org", "repo"?: "owner/name", "environment"?: "prod",'
+    );
+    lines.push(
+        '      "org"?: "my-org", "secret": "NAME", "value": "secret", "selectedRepos"?: ["owner/repo"] } ]'
+    );
+    lines.push("");
+    lines.push(heading("Plan file format (CSV)"));
+    lines.push(
+        "  target,repo,environment,org,secret,value,visibility,selectedRepos"
+    );
+    lines.push(
+        '  env,owner/repo,production,,API_KEY,"value",,"owner/repo-a|owner/repo-b"'
+    );
     lines.push("");
 
-    lines.push(heading("  Examples:"));
+    lines.push(heading("Examples"));
     for (const example of HELP_EXAMPLES) {
-        lines.push(`    ${styleCommandExample(example, styler)}`);
+        lines.push(`  ${styleCommandExample(example, styler)}`);
     }
-    lines.push("  ");
 
     return lines.join("\n");
 }
 
-export function printHelp(): string {
-    return buildHelpText();
+export function renderHelpText(styler?: Styler): string {
+    return buildHelpText(styler);
 }
 
-export function renderHelpText(styler: Styler): string {
+export function printHelp(styler?: Styler): string {
     return buildHelpText(styler);
 }
