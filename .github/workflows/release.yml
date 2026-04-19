@@ -65,7 +65,7 @@ jobs:
 
         steps:
             - name: Harden the runner (Audit all outbound calls)
-              uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+              uses: step-security/harden-runner@6c3c2f2c1c457b00c10c4848d6f5491db3b629df # v2.18.0
               with:
                   egress-policy: audit
 
@@ -280,14 +280,14 @@ jobs:
                   } > "${RELEASE_NOTES_PATH}"
 
             - name: Upload release notes artifact
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: release-notes-${{ steps.version.outputs.tag }}
                   path: ${{ env.RELEASE_NOTES_PATH }}
                   if-no-files-found: error
 
             - name: Create GitHub release
-              uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
+              uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
               with:
                   tag_name: ${{ steps.version.outputs.tag }}
                   name: ${{ steps.version.outputs.tag }}
