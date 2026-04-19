@@ -132,7 +132,7 @@ function isValidRepoSlug(value: string): boolean {
 }
 
 function isValidSecretName(value: string): boolean {
-    return /^(?!\d)[A-Za-z_][A-Za-z0-9_]*$/u.test(value);
+    return /^(?!\d)[A-Za-z_][\w]*$/u.test(value);
 }
 
 function collectStringListOption(
@@ -649,6 +649,229 @@ function parseVisibility(
     return normalized;
 }
 
+function buildOrgModeOperations(
+    operations: SecretOperation[],
+    org: string,
+    secretsForSimpleMode: Array<{ name: string; value: string }>,
+    options: ParsedOptions,
+    jsonOutput: boolean,
+    styler: Styler
+): number | undefined {
+    const visibility = parseVisibility(
+        typeof options["org-visibility"] === "string"
+            ? options["org-visibility"]
+            : undefined,
+        jsonOutput,
+        styler
+    );
+    if (typeof visibility === "number") {
+        return visibility;
+    }
+
+    const selectedReposOption = collectStringListOption(
+        options,
+        "org-selected-repos"
+    );
+    const validatedSelected = validateRepoList(
+        selectedReposOption,
+        jsonOutput,
+        styler
+    );
+    if (typeof validatedSelected === "number") {
+        return validatedSelected;
+    }
+
+    for (const secret of secretsForSimpleMode) {
+        const target: SecretTarget = {
+            kind: "org",
+            org,
+        };
+        if (validatedSelected.length > 0) {
+            target.selectedRepos = validatedSelected;
+        }
+        if (
+            visibility === "all" ||
+            visibility === "private" ||
+            visibility === "selected"
+        ) {
+            target.visibility = visibility;
+        }
+
+        addOperationForTargets(operations, target, secret.name, secret.value);
+    }
+
+    return undefined;
+}
+
+function buildRepoModeOperations(
+    operations: SecretOperation[],
+    validatedRepos: string[],
+    secretsForSimpleMode: Array<{ name: string; value: string }>,
+    environment: string,
+    jsonOutput: boolean,
+    styler: Styler
+): number | undefined {
+    let finalRepos = validatedRepos;
+    if (finalRepos.length === 0) {
+        const resolved = resolveRepo(undefined);
+        if (typeof resolved !== "string" || resolved.length === 0) {
+            if (!jsonOutput) {
+                console.log(printHelp(styler));
+            }
+            return emitError(
+                "unable to resolve repository. Provide --repo/--repos/--repo-file, --org, or --plan-file.",
+                "validation_error",
+                jsonOutput,
+                styler
+            );
+        }
+
+        finalRepos = [resolved];
+    }
+
+    for (const repo of finalRepos) {
+        for (const secret of secretsForSimpleMode) {
+            const target: SecretTarget = {
+                kind: "repo",
+                repo,
+            };
+            if (environment.length > 0) {
+                target.environment = environment;
+            }
+
+            addOperationForTargets(
+                operations,
+                target,
+                secret.name,
+                secret.value
+            );
+        }
+    }
+
+    return undefined;
+}
+
+function collectRepositoryTargets(
+    options: ParsedOptions,
+    jsonOutput: boolean,
+    styler: Styler
+): number | string[] {
+    const repoOption =
+        typeof options["repo"] === "string" ? options["repo"].trim() : "";
+    const reposOption = collectStringListOption(options, "repos");
+    const repoFile =
+        typeof options["repo-file"] === "string"
+            ? options["repo-file"].trim()
+            : "";
+
+    const repoTargets: string[] = [];
+    if (repoOption.length > 0) {
+        repoTargets.push(repoOption);
+    }
+    repoTargets.push(...reposOption);
+
+    if (repoFile.length > 0) {
+        try {
+            repoTargets.push(...readRepoFile(repoFile));
+        } catch (error) {
+            const message =
+                error instanceof Error ? error.message : String(error);
+            return emitError(
+                `unable to read --repo-file ${repoFile}: ${message}`,
+                "validation_error",
+                jsonOutput,
+                styler
+            );
+        }
+    }
+
+    return validateRepoList(repoTargets, jsonOutput, styler);
+}
+
+async function collectSecrets(
+    options: ParsedOptions,
+    jsonOutput: boolean,
+    styler: Styler,
+    dryRun: boolean
+): Promise<number | Array<{ name: string; value: string }>> {
+    const setPairs = collectStringListOption(options, "set");
+    const setEnvPairs = collectStringListOption(options, "set-env");
+    const singleSecretName =
+        typeof options["secret-name"] === "string"
+            ? options["secret-name"].trim()
+            : "";
+
+    const secretsForSimpleMode: Array<{ name: string; value: string }> = [];
+
+    for (const pair of setPairs) {
+        const normalized = normalizeSecretPair(
+            pair,
+            "--set",
+            jsonOutput,
+            styler
+        );
+        if (typeof normalized === "number") {
+            return normalized;
+        }
+        secretsForSimpleMode.push(normalized);
+    }
+
+    for (const pair of setEnvPairs) {
+        const normalized = normalizeSecretPair(
+            pair,
+            "--set-env",
+            jsonOutput,
+            styler
+        );
+        if (typeof normalized === "number") {
+            return normalized;
+        }
+
+        const envValue = process.env[normalized.value];
+        if (typeof envValue !== "string" || envValue.length === 0) {
+            return emitError(
+                `environment variable ${normalized.value} is empty or missing for --set-env ${normalized.name}.`,
+                "validation_error",
+                jsonOutput,
+                styler
+            );
+        }
+
+        secretsForSimpleMode.push({
+            name: normalized.name,
+            value: envValue,
+        });
+    }
+
+    if (singleSecretName.length > 0) {
+        if (!isValidSecretName(singleSecretName)) {
+            return emitError(
+                `invalid --secret-name: ${singleSecretName}.`,
+                "validation_error",
+                jsonOutput,
+                styler
+            );
+        }
+
+        const singleValue = await resolveSingleSecretValue(
+            options,
+            jsonOutput,
+            styler,
+            dryRun
+        );
+        if (typeof singleValue === "number") {
+            return singleValue;
+        }
+
+        secretsForSimpleMode.push({
+            name: singleSecretName,
+            value: singleValue,
+        });
+    }
+
+    return secretsForSimpleMode;
+}
+
 function addOperationForTargets(
     operations: SecretOperation[],
     target: SecretTarget,
@@ -906,6 +1129,7 @@ async function buildExecutionConfig(
 
     const operations: SecretOperation[] = [];
 
+    // Load plan operations if provided
     const planFile =
         typeof options["plan-file"] === "string"
             ? options["plan-file"].trim()
@@ -924,37 +1148,18 @@ async function buildExecutionConfig(
         operations.push(...planOperations);
     }
 
-    const repoOption =
-        typeof options["repo"] === "string" ? options["repo"].trim() : "";
-    const reposOption = collectStringListOption(options, "repos");
-    const repoFile =
-        typeof options["repo-file"] === "string"
-            ? options["repo-file"].trim()
-            : "";
-
-    const repoTargets: string[] = [];
-    if (repoOption.length > 0) {
-        repoTargets.push(repoOption);
-    }
-    repoTargets.push(...reposOption);
-
-    if (repoFile.length > 0) {
-        try {
-            repoTargets.push(...readRepoFile(repoFile));
-        } catch (error) {
-            const message =
-                error instanceof Error ? error.message : String(error);
-            return emitError(
-                `unable to read --repo-file ${repoFile}: ${message}`,
-                "validation_error",
-                jsonOutput,
-                styler
-            );
-        }
+    // Collect and validate repository targets
+    const validatedRepos = collectRepositoryTargets(
+        options,
+        jsonOutput,
+        styler
+    );
+    if (typeof validatedRepos === "number") {
+        return validatedRepos;
     }
 
     const org = typeof options["org"] === "string" ? options["org"].trim() : "";
-    if (org.length > 0 && repoTargets.length > 0) {
+    if (org.length > 0 && validatedRepos.length > 0) {
         return emitError(
             "--org cannot be combined with --repo/--repos/--repo-file.",
             "validation_error",
@@ -963,178 +1168,50 @@ async function buildExecutionConfig(
         );
     }
 
-    const validatedRepos = validateRepoList(repoTargets, jsonOutput, styler);
-    if (typeof validatedRepos === "number") {
-        return validatedRepos;
+    // Collect secrets from CLI options
+    const secretsForSimpleMode = await collectSecrets(
+        options,
+        jsonOutput,
+        styler,
+        dryRun
+    );
+    if (typeof secretsForSimpleMode === "number") {
+        return secretsForSimpleMode;
     }
 
-    const setPairs = collectStringListOption(options, "set");
-    const setEnvPairs = collectStringListOption(options, "set-env");
-    const singleSecretName =
-        typeof options["secret-name"] === "string"
-            ? options["secret-name"].trim()
-            : "";
-
-    const secretsForSimpleMode: Array<{ name: string; value: string }> = [];
-
-    for (const pair of setPairs) {
-        const normalized = normalizeSecretPair(
-            pair,
-            "--set",
-            jsonOutput,
-            styler
-        );
-        if (typeof normalized === "number") {
-            return normalized;
-        }
-        secretsForSimpleMode.push(normalized);
-    }
-
-    for (const pair of setEnvPairs) {
-        const normalized = normalizeSecretPair(
-            pair,
-            "--set-env",
-            jsonOutput,
-            styler
-        );
-        if (typeof normalized === "number") {
-            return normalized;
-        }
-
-        const envValue = process.env[normalized.value];
-        if (typeof envValue !== "string" || envValue.length === 0) {
-            return emitError(
-                `environment variable ${normalized.value} is empty or missing for --set-env ${normalized.name}.`,
-                "validation_error",
-                jsonOutput,
-                styler
-            );
-        }
-
-        secretsForSimpleMode.push({
-            name: normalized.name,
-            value: envValue,
-        });
-    }
-
-    if (singleSecretName.length > 0) {
-        if (!isValidSecretName(singleSecretName)) {
-            return emitError(
-                `invalid --secret-name: ${singleSecretName}.`,
-                "validation_error",
-                jsonOutput,
-                styler
-            );
-        }
-
-        const singleValue = await resolveSingleSecretValue(
-            options,
-            jsonOutput,
-            styler,
-            dryRun
-        );
-        if (typeof singleValue === "number") {
-            return singleValue;
-        }
-
-        secretsForSimpleMode.push({
-            name: singleSecretName,
-            value: singleValue,
-        });
-    }
-
+    // Build operations for simple mode (if secrets were provided)
     if (secretsForSimpleMode.length > 0) {
         const environment =
             typeof options["env"] === "string" ? options["env"].trim() : "";
 
         if (org.length > 0) {
-            const visibility = parseVisibility(
-                typeof options["org-visibility"] === "string"
-                    ? options["org-visibility"]
-                    : undefined,
-                jsonOutput,
-                styler
-            );
-            if (typeof visibility === "number") {
-                return visibility;
-            }
-
-            const selectedReposOption = collectStringListOption(
+            const result = buildOrgModeOperations(
+                operations,
+                org,
+                secretsForSimpleMode,
                 options,
-                "org-selected-repos"
-            );
-            const validatedSelected = validateRepoList(
-                selectedReposOption,
                 jsonOutput,
                 styler
             );
-            if (typeof validatedSelected === "number") {
-                return validatedSelected;
-            }
-
-            for (const secret of secretsForSimpleMode) {
-                const target: SecretTarget = {
-                    kind: "org",
-                    org,
-                };
-                if (validatedSelected.length > 0) {
-                    target.selectedRepos = validatedSelected;
-                }
-                if (
-                    visibility === "all" ||
-                    visibility === "private" ||
-                    visibility === "selected"
-                ) {
-                    target.visibility = visibility;
-                }
-
-                addOperationForTargets(
-                    operations,
-                    target,
-                    secret.name,
-                    secret.value
-                );
+            if (typeof result === "number") {
+                return result;
             }
         } else {
-            let finalRepos = validatedRepos;
-            if (finalRepos.length === 0) {
-                const resolved = resolveRepo(undefined);
-                if (typeof resolved !== "string" || resolved.length === 0) {
-                    if (!jsonOutput) {
-                        console.log(printHelp(styler));
-                    }
-                    return emitError(
-                        "unable to resolve repository. Provide --repo/--repos/--repo-file, --org, or --plan-file.",
-                        "validation_error",
-                        jsonOutput,
-                        styler
-                    );
-                }
-
-                finalRepos = [resolved];
-            }
-
-            for (const repo of finalRepos) {
-                for (const secret of secretsForSimpleMode) {
-                    const target: SecretTarget = {
-                        kind: "repo",
-                        repo,
-                    };
-                    if (environment.length > 0) {
-                        target.environment = environment;
-                    }
-
-                    addOperationForTargets(
-                        operations,
-                        target,
-                        secret.name,
-                        secret.value
-                    );
-                }
+            const result = buildRepoModeOperations(
+                operations,
+                validatedRepos,
+                secretsForSimpleMode,
+                environment,
+                jsonOutput,
+                styler
+            );
+            if (typeof result === "number") {
+                return result;
             }
         }
     }
 
+    // Validate that we have at least some operations
     if (operations.length === 0) {
         if (!jsonOutput) {
             console.log(printHelp(styler));
@@ -1147,6 +1224,7 @@ async function buildExecutionConfig(
         );
     }
 
+    // Verify gh authentication
     if (!checkGhAuth()) {
         return emitError(
             "gh CLI is not authenticated. Run: gh auth login",

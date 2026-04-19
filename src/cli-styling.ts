@@ -29,6 +29,16 @@ export function createStyler(useColor: boolean): Styler {
         return apply("90", text);
     };
 
+    const count = (value: number): string => {
+        if (value === 0) {
+            return apply("90", String(value));
+        }
+        if (value > 0) {
+            return apply("1;36", String(value));
+        }
+        return String(value);
+    };
+
     return {
         heading: (text) => apply("1;36", text),
         strong: (text) => apply("1", text),
@@ -38,12 +48,7 @@ export function createStyler(useColor: boolean): Styler {
         warn: (text) => apply("33", text),
         error: (text) => apply("31", text),
         status,
-        count: (value) =>
-            value === 0
-                ? apply("90", String(value))
-                : value > 0
-                  ? apply("1;36", String(value))
-                  : String(value),
+        count,
         flag: (text) => apply("38;5;51", text),
         arg: (text) => apply("38;5;221", text),
     };
@@ -216,16 +221,24 @@ export function createProgressBar(
                 ? Math.max(0, terminalWidth - plainPrefix.length - 1)
                 : undefined;
 
-        const suffixText =
-            typeof suffixBudget === "number"
-                ? suffixBudget <= 0
-                    ? ""
-                    : suffix.length <= suffixBudget
-                      ? suffix
-                      : `${suffix.slice(0, Math.max(0, suffixBudget - 1))}…`
-                : suffix;
+        const getSuffixText = (): string => {
+            if (typeof suffixBudget !== "number") {
+                return suffix;
+            }
+            if (suffixBudget <= 0) {
+                return "";
+            }
+            if (suffix.length <= suffixBudget) {
+                return suffix;
+            }
+            return `${suffix.slice(0, Math.max(0, suffixBudget - 1))}…`;
+        };
 
-        const line = `${styler.info(title)} ${styler.muted("[")}${styler.ok(bar)}${styler.muted("]")} ${styler.strong(progressText)} ${styler.muted(`${percent}%`)}${suffixText.length > 0 ? ` ${styler.muted(suffixText)}` : ""}`;
+        const suffixText = getSuffixText();
+        const suffixPart =
+            suffixText.length > 0 ? ` ${styler.muted(suffixText)}` : "";
+
+        const line = `${styler.info(title)} ${styler.muted("[")}${styler.ok(bar)}${styler.muted("]")} ${styler.strong(progressText)} ${styler.muted(`${percent}%`)}${suffixPart}`;
         process.stdout.write(`\r\u001b[2K${line}`);
     };
 

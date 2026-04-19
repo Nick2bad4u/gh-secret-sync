@@ -101,6 +101,15 @@ const parseArguments = (argumentList) => {
             continue;
         }
 
+        const handleVersionFlag = (versionValue) => {
+            if (explicitVersion !== null) {
+                throw new TypeError(
+                    "The --version flag can only be specified once."
+                );
+            }
+            explicitVersion = normalizeNodeVersion(versionValue);
+        };
+
         if (argument === "--version") {
             const nextArgument = argumentList[index + 1];
 
@@ -108,15 +117,13 @@ const parseArguments = (argumentList) => {
                 throw new TypeError("Expected a version after --version.");
             }
 
-            explicitVersion = normalizeNodeVersion(nextArgument);
+            handleVersionFlag(nextArgument);
             index += 1;
             continue;
         }
 
         if (argument.startsWith("--version=")) {
-            explicitVersion = normalizeNodeVersion(
-                argument.slice("--version=".length)
-            );
+            handleVersionFlag(argument.slice("--version=".length));
             continue;
         }
 

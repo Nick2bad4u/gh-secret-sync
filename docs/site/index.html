@@ -85,7 +85,7 @@
             (function (w, d, s, l, i) {
                 w[l] = w[l] || [];
                 w[l].push({
-                    "gtm.start": new Date().getTime(),
+                    "gtm.start": Date.now(),
                     event: "gtm.js",
                 });
                 var f = d.getElementsByTagName(s)[0],
@@ -729,7 +729,7 @@ Applied: 3 | Failed: 0 | Total: 3</code></pre>
                 "[data-copy-text]"
             )) {
                 button.addEventListener("click", async () => {
-                    const text = button.getAttribute("data-copy-text") || "";
+                    const text = button.dataset.copyText || "";
                     const label = button.querySelector(".copy-button-label");
                     const originalLabel = label?.textContent || "Copy";
 
@@ -745,7 +745,7 @@ Applied: 3 | Failed: 0 | Total: 3</code></pre>
                         }
                     }
 
-                    window.setTimeout(() => {
+                    globalThis.setTimeout(() => {
                         if (label) {
                             label.textContent = originalLabel;
                         }
