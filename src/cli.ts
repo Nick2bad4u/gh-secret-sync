@@ -1349,6 +1349,7 @@ export async function main(argv: string[]): Promise<number> {
 
 const isDirectExecution =
     typeof process.argv[1] === "string" &&
+    typeof import.meta.url === "string" &&
     fileURLToPath(import.meta.url) === process.argv[1];
 
 export function runCli(): void {
