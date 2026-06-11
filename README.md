@@ -103,30 +103,30 @@ JSON example:
 
 ```json
 [
-  {
-    "target": "repo",
-    "repo": "owner/repo-a",
-    "secret": "API_KEY",
-    "value": "value-a"
-  },
-  {
-    "target": "env",
-    "repo": "owner/repo-b",
-    "environment": "production",
-    "secret": "API_KEY",
-    "value": "value-b"
-  },
-  {
-    "target": "org",
-    "org": "my-org",
-    "secret": "SHARED_TOKEN",
-    "value": "value-c",
-    "visibility": "private",
-    "selectedRepos": [
-      "owner/repo-a",
-      "owner/repo-b"
-    ]
-  }
+ {
+  "target": "repo",
+  "repo": "owner/repo-a",
+  "secret": "API_KEY",
+  "value": "value-a"
+ },
+ {
+  "target": "env",
+  "repo": "owner/repo-b",
+  "environment": "production",
+  "secret": "API_KEY",
+  "value": "value-b"
+ },
+ {
+  "target": "org",
+  "org": "my-org",
+  "secret": "SHARED_TOKEN",
+  "value": "value-c",
+  "visibility": "private",
+  "selectedRepos": [
+   "owner/repo-a",
+   "owner/repo-b"
+  ]
+ }
 ]
 ```
 
