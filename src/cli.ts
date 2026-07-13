@@ -627,7 +627,12 @@ function parseVisibility(
     raw: string | undefined,
     jsonOutput: boolean,
     styler: Styler
-): number | "all" | "private" | "selected" | undefined {
+):
+    | number
+    | "all"
+    | "private"
+    | "selected"
+    | undefined {
     if (typeof raw !== "string" || raw.length === 0) {
         return undefined;
     }

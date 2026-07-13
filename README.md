@@ -2,7 +2,7 @@
 
 [![GitHub stars.](https://flat.badgen.net/github/stars/Nick2bad4u/gh-secret-sync?color=yellow)](https://github.com/Nick2bad4u/gh-secret-sync/stargazers) [![GitHub forks.](https://flat.badgen.net/github/forks/Nick2bad4u/gh-secret-sync?color=green)](https://github.com/Nick2bad4u/gh-secret-sync/forks) [![GitHub open issues.](https://flat.badgen.net/github/open-issues/Nick2bad4u/gh-secret-sync?color=red)](https://github.com/Nick2bad4u/gh-secret-sync/issues)
 
-`gh-secret-sync` is a GitHub CLI extension for safely syncing secrets across many repositories, environments, and organization targets.
+`gh-secret-sync` is a GitHub CLI extension for safely syncing secrets across repositories, environments, and organization targets.
 
 It is built for bulk secret updates where safety and deterministic output matter.
 
@@ -28,7 +28,7 @@ gh extension install Nick2bad4u/gh-secret-sync
 
 ## Usage
 
-Use `gh secret-sync` to apply one or many secret updates across repository, environment, or organization targets from CLI input or plan files.
+Use `gh secret-sync` to apply one or more secret updates across repository, environment, or organization targets from CLI input or plan files.
 
 ```bash
 # Single secret, single repo
@@ -122,10 +122,7 @@ JSON example:
   "secret": "SHARED_TOKEN",
   "value": "value-c",
   "visibility": "private",
-  "selectedRepos": [
-   "owner/repo-a",
-   "owner/repo-b"
-  ]
+  "selectedRepos": ["owner/repo-a", "owner/repo-b"]
  }
 ]
 ```
