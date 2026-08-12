@@ -71,7 +71,7 @@
         "@microsoft/tsdoc-config": "^0.18.1",
         "@softonus/prettier-plugin-duplicate-remover": "^1.1.2",
         "@types/node": "^26.1.1",
-        "esbuild": "^0.28.1",
+        "esbuild": "^0.28.2",
         "eslint": "^10.7.0",
         "eslint-config-nick2bad4u": "^5.0.0",
         "git-cliff": "^2.13.1",
