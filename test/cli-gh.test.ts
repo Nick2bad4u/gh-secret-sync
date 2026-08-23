@@ -1,3 +1,4 @@
+import * as nodePath from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { GhResponse, SecretOperation } from "../src/cli-types.ts";
@@ -18,6 +19,8 @@ const FIRST_TRUSTED_GH_PATH: Readonly<Record<string, string>> = {
     openbsd: "/usr/local/bin/gh",
     win32: String.raw`C:\Program Files\GitHub CLI\gh.exe`,
 };
+
+const TEST_GH_PATH = nodePath.resolve("test", "fixtures", "gh-test");
 
 const existsSyncMock = vi.hoisted(() => vi.fn<(path: string) => boolean>());
 const spawnSyncMock = vi.hoisted(() =>
@@ -47,6 +50,7 @@ function respond(response: Partial<GhResponse> = {}): void {
 }
 
 beforeEach(() => {
+    vi.stubEnv("GH_PATH", TEST_GH_PATH);
     existsSyncMock.mockReset();
     existsSyncMock.mockReturnValue(true);
     spawnSyncMock.mockReset();
@@ -61,22 +65,20 @@ describe(resolveGhExecutablePath, () => {
     it.each(Object.entries(FIRST_TRUSTED_GH_PATH))(
         "uses the first trusted path on %s",
         (platform, expectedPath) => {
-            expect(
-                resolveGhExecutablePath(platform, undefined, () => true)
-            ).toBe(expectedPath);
+            expect(resolveGhExecutablePath(platform, "", () => true)).toBe(
+                expectedPath
+            );
         }
     );
 
     it("uses an existing absolute GH_PATH override", () => {
-        const configuredPath = String.raw`D:\Tools\gh.exe`;
-
         expect(
             resolveGhExecutablePath(
-                "win32",
-                configuredPath,
-                (path) => path === configuredPath
+                process.platform,
+                TEST_GH_PATH,
+                (path) => path === TEST_GH_PATH
             )
-        ).toBe(configuredPath);
+        ).toBe(TEST_GH_PATH);
     });
 
     it.each([
@@ -99,7 +101,7 @@ describe(runGh, () => {
             stdout: "result",
         });
         expect(spawnSyncMock).toHaveBeenCalledWith(
-            FIRST_TRUSTED_GH_PATH["win32"],
+            TEST_GH_PATH,
             ["auth", "status"],
             { encoding: "utf8", stdio: "pipe" }
         );
@@ -165,7 +167,7 @@ describe(runGhWithInput, () => {
             stdout: "",
         });
         expect(spawnSyncMock).toHaveBeenCalledWith(
-            FIRST_TRUSTED_GH_PATH["win32"],
+            TEST_GH_PATH,
             [
                 "secret",
                 "set",
@@ -324,7 +326,7 @@ describe(applySecretOperation, () => {
                 operation,
             });
             expect(spawnSyncMock).toHaveBeenCalledWith(
-                FIRST_TRUSTED_GH_PATH["win32"],
+                TEST_GH_PATH,
                 expectedArguments,
                 expect.objectContaining({ input: operation.value })
             );
