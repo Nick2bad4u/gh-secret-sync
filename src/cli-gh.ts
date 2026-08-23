@@ -84,11 +84,12 @@ export function isGhAuthenticated(): boolean {
     return response.status === 0;
 }
 
-/** Resolve GitHub CLI without executing a command through PATH search. */
+/** Resolve GitHub CLI to an existing absolute executable path. */
 export function resolveGhExecutablePath(
     platform: string = process.platform,
     configuredPath: string | undefined = process.env["GH_PATH"],
-    isExistingFile: FileExistenceCheck = existsSync
+    isExistingFile: FileExistenceCheck = existsSync,
+    pathValue: string | undefined = process.env["PATH"]
 ): string | undefined {
     if (
         typeof configuredPath === "string" &&
@@ -96,6 +97,15 @@ export function resolveGhExecutablePath(
         isExistingFile(configuredPath)
     ) {
         return configuredPath;
+    }
+
+    const pathExecutable = resolveGhExecutableFromPath(
+        platform,
+        pathValue,
+        isExistingFile
+    );
+    if (pathExecutable !== undefined) {
+        return pathExecutable;
     }
 
     return GH_EXECUTABLE_PATHS[platform]?.find((candidate) =>
@@ -165,7 +175,7 @@ export function runGhWithInput(
 function missingGhResponse(): GhResponse {
     return {
         status: 1,
-        stderr: "Unable to locate the GitHub CLI in a trusted system location. Set GH_PATH to its absolute executable path.",
+        stderr: "Unable to locate the GitHub CLI through GH_PATH, PATH, or a trusted system location. Set GH_PATH to its absolute executable path.",
         stdout: "",
     };
 }
@@ -182,6 +192,35 @@ function normalizeErrorMessage(response: GhResponse): string {
     }
 
     return `gh command failed with exit code ${response.status}`;
+}
+
+function resolveGhExecutableFromPath(
+    platform: string,
+    pathValue: string | undefined,
+    isExistingFile: FileExistenceCheck
+): string | undefined {
+    if (typeof pathValue !== "string" || pathValue.length === 0) {
+        return undefined;
+    }
+
+    const executableName = platform === "win32" ? "gh.exe" : "gh";
+    for (const rawPathEntry of pathValue.split(nodePath.delimiter)) {
+        const trimmedPathEntry = rawPathEntry.trim();
+        const pathEntry =
+            trimmedPathEntry.startsWith('"') && trimmedPathEntry.endsWith('"')
+                ? trimmedPathEntry.slice(1, -1)
+                : trimmedPathEntry;
+        if (!nodePath.isAbsolute(pathEntry)) {
+            continue;
+        }
+
+        const candidate = nodePath.join(pathEntry, executableName);
+        if (isExistingFile(candidate)) {
+            return candidate;
+        }
+    }
+
+    return undefined;
 }
 
 function toGhResponse(

@@ -65,11 +65,37 @@ describe(resolveGhExecutablePath, () => {
     it.each(Object.entries(FIRST_TRUSTED_GH_PATH))(
         "uses the first trusted path on %s",
         (platform, expectedPath) => {
-            expect(resolveGhExecutablePath(platform, "", () => true)).toBe(
+            expect(resolveGhExecutablePath(platform, "", () => true, "")).toBe(
                 expectedPath
             );
         }
     );
+
+    it("resolves a host-native GitHub CLI from an absolute PATH entry", () => {
+        const executableName = process.platform === "win32" ? "gh.exe" : "gh";
+        const pathEntry = nodePath.resolve("test", "fixtures", "custom-bin");
+        const expectedPath = nodePath.join(pathEntry, executableName);
+
+        expect(
+            resolveGhExecutablePath(
+                process.platform,
+                "",
+                (path) => path === expectedPath,
+                pathEntry
+            )
+        ).toBe(expectedPath);
+    });
+
+    it("ignores relative PATH entries", () => {
+        expect(
+            resolveGhExecutablePath(
+                process.platform,
+                "",
+                () => true,
+                "relative-bin"
+            )
+        ).toBe(FIRST_TRUSTED_GH_PATH[process.platform]);
+    });
 
     it("uses an existing absolute GH_PATH override", () => {
         expect(
