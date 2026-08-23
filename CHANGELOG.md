@@ -4,9 +4,21 @@
 
 ## ✨ What's Changed
 
-- <b>Commit Range: ➡️</b> [`v1.0.2...74e0b11`](https://github.com/Nick2bad4u/gh-secret-sync/compare/v1.0.2...74e0b111f3940f353db68d5b7a10f128a11243bd "View full commit range on GitHub")
+- <b>Commit Range: ➡️</b> [`v1.0.2...d5a7253`](https://github.com/Nick2bad4u/gh-secret-sync/compare/v1.0.2...d5a7253622ec3835f61ad840c3e8811478e42490 "View full commit range on GitHub")
 
 ### 🛠️ Bug Fixes
+
+- [`d5a7253`](https://github.com/Nick2bad4u/gh-secret-sync/commit/d5a7253622ec3835f61ad840c3e8811478e42490 "Diff: 4 files, +76 | -6") — 🐛 [fix] Preserve custom GitHub CLI installations&nbsp;<sub><em>(4&nbsp;files,&nbsp;+76,&nbsp;-6)</em></sub>
+    - 🐛 [fix] Resolve gh from absolute PATH entries before trusted fallbacks while keeping an explicit absolute GH_PATH override and secret values on stdin.
+    - 🧪 [test] Cover host-native PATH discovery and rejection of relative PATH entries across Windows and Linux.
+    - 📝 [docs] Align README and rendered-site Node support with the declared engine range and document executable discovery.
+
+- [`5a7bf7a`](https://github.com/Nick2bad4u/gh-secret-sync/commit/5a7bf7a8692ebfa9026fe5d3c2d89fb669c04dbb "Diff: 4 files, +77 | -72") — 🐛 [fix] Address release review findings&nbsp;<sub><em>(4&nbsp;files,&nbsp;+77,&nbsp;-72)</em></sub>
+    - 🐛 [fix] Validate synchronized Node versions against the complete declared engine range with semver, including unsupported gap releases such as Node 25.
+    - ♻️ [refactor] Separate plan-file reading and parsing from operation construction to clear the remaining Sonar cognitive-complexity finding without changing CLI behavior.
+
+- [`8319459`](https://github.com/Nick2bad4u/gh-secret-sync/commit/8319459ab4f6176d91002bc8db634dbf727f8fca "Diff: 1 file, +38 | -0") — 🐛 [fix] Pin project TOML lint policy&nbsp;<sub><em>(1&nbsp;file,&nbsp;+38,&nbsp;-0)</em></sub>
+    - 🐛 [fix] Add a repository-owned Tombi configuration so local and Linux CI lint runs use the same TOML formatting and diagnostic rules instead of inheriting machine-level defaults.
 
 - [`497827a`](https://github.com/Nick2bad4u/gh-secret-sync/commit/497827a2c524516cc15f19bda3090180369d933b "Diff: 42 files, +19060 | -20179") — 🐛 [fix] Harden secret sync execution and quality gates&nbsp;<sub><em>(42&nbsp;files,&nbsp;+19060,&nbsp;-20179)</em></sub>
     - 🐛 [fix] Keep secret values on stdin for gh secret set, reject reserved GITHUB_ names, preserve inline NAME=value input, and trust only explicit GitHub CLI paths.
@@ -14,6 +26,16 @@
     - 🧪 [test] Migrate to Vitest with 108 CLI, GitHub invocation, help, styling, CSV, JSON, and failure-path tests; enforce 90% per-file coverage.
     - 🧹 [chore] Align Node 22/24/26 and npm 12 policy, modernize shared lint/config dependencies, remove vulnerable transitive packages, and harden native asset smoke tests.
     - 🎨 [style] Resolve HTML and CSS diagnostics while preserving the responsive documentation experience.
+
+### 📝 Documentation
+
+- [`64bee94`](https://github.com/Nick2bad4u/gh-secret-sync/commit/64bee949540e9314eabe7bf2a9a39709c44b049d "Diff: 2 files, +1127 | -0") — 📝 [docs] Generate modernization changelog&nbsp;<sub><em>(2&nbsp;files,&nbsp;+1127,&nbsp;-0)</em></sub>
+    - 📝 [docs] Record the secret-handling fixes, strict coverage migration, dependency modernization, and hardened CI/release pipeline since v1.0.2.
+
+### 🧪 Testing
+
+- [`cd20a63`](https://github.com/Nick2bad4u/gh-secret-sync/commit/cd20a63e6d9bfa6e1975086cb912ff3f5f18053b "Diff: 1 file, +14 | -12") — 🧪 [test] Make GitHub CLI tests platform-neutral&nbsp;<sub><em>(1&nbsp;file,&nbsp;+14,&nbsp;-12)</em></sub>
+    - 🧪 [test] Resolve the mocked GH_PATH from the current host so Windows and Linux exercise identical secret-stdin and executable-selection behavior without hardcoded runner paths.
 
 ### 🧹 Chores
 
