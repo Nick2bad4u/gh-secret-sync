@@ -35,6 +35,7 @@
 **/*~
 
 # Generated content
+.lychee.report.md
 **/auto-generated/
 **/build/
 **/dist/
