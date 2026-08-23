@@ -1,128 +1,68 @@
-export type WorkflowRun = {
-    databaseId: number;
-    status?: string;
-    conclusion?: string;
-    workflowName?: string;
-    headBranch?: string;
-    event?: string;
-    createdAt?: string;
-    displayTitle?: string;
-    url?: string;
-};
+/** Controls whether terminal styling is emitted. */
+export type ColorMode =
+    | "always"
+    | "auto"
+    | "never";
 
-export type ParsedOptions = Record<
-    string,
-    | string
-    | boolean
-    | string[]
+/** Stable machine-readable category for a CLI error. */
+export type ErrorCategory = "auth_error" | "validation_error";
+
+/** Captured result of invoking the GitHub CLI. */
+export interface GhResponse {
+    readonly status: number;
+    readonly stderr: string;
+    readonly stdout: string;
+}
+
+/** Parsed command-line options keyed by their long flag name. */
+export type ParsedOptions = Readonly<
+    Record<
+        string,
+        | boolean
+        | readonly string[]
+        | string
+    >
 >;
 
-export type ColorMode =
-    | "auto"
-    | "always"
-    | "never";
-export type UnicodeMode =
-    | "auto"
-    | "always"
-    | "never";
+/** One secret write and its resolved destination. */
+export interface SecretOperation {
+    readonly secretName: string;
+    readonly target: SecretTarget;
+    readonly value: string;
+}
 
-export type GhResponse = {
-    stdout: string;
-    stderr: string;
-    status: number;
-};
+/** Outcome of applying a resolved secret operation. */
+export interface SecretOperationResult {
+    readonly error?: string;
+    readonly ok: boolean;
+    readonly operation: SecretOperation;
+}
 
-export type ErrorCategory =
-    | "validation_error"
-    | "auth_error"
-    | "gh_cli_error"
-    | "runtime_error";
-
-export type DeleteResult = {
-    attempts: number;
-    error?: string;
-    ok: boolean;
-};
-
-export type RunSummary = {
-    attempted: number;
-    deleted: number;
-    dryRun: boolean;
-    durationMs: number;
-    failed: number;
-    failedIds: number[];
-    matched: number;
-    repo: string;
-    planned: number;
-    skippedByExclusion: number;
-    statuses: string[];
-    skippedByAge: number;
-};
-
-export type Styler = {
-    heading: (text: string) => string;
-    strong: (text: string) => string;
-    info: (text: string) => string;
-    muted: (text: string) => string;
-    ok: (text: string) => string;
-    warn: (text: string) => string;
-    error: (text: string) => string;
-    status: (text: string) => string;
-    count: (value: number) => string;
-    flag: (text: string) => string;
-    arg: (text: string) => string;
-};
-
+/** Repository, environment, or organization destination for a secret. */
 export type SecretTarget =
     | {
-          environment?: string;
-          kind: "repo";
-          repo: string;
+          readonly environment?: string;
+          readonly kind: "repo";
+          readonly repo: string;
       }
     | {
-          kind: "org";
-          org: string;
-          selectedRepos?: string[];
-          visibility?:
+          readonly kind: "org";
+          readonly org: string;
+          readonly selectedRepos?: readonly string[];
+          readonly visibility?:
               | "all"
               | "private"
               | "selected";
       };
 
-export type SecretOperation = {
-    secretName: string;
-    target: SecretTarget;
-    value: string;
-};
-
-export type SecretOperationResult = {
-    error?: string;
-    operation: SecretOperation;
-    ok: boolean;
-};
-
-export type SecretRunSummary = {
-    applied: number;
-    dryRun: boolean;
-    failed: number;
-    results: SecretOperationResult[];
-    total: number;
-};
-
-export const VALID_STATUSES = new Set([
-    "queued",
-    "completed",
-    "in_progress",
-    "requested",
-    "waiting",
-    "pending",
-    "action_required",
-    "cancelled",
-    "failure",
-    "neutral",
-    "skipped",
-    "stale",
-    "startup_failure",
-    "success",
-    "timed_out",
-]);
+/** Functions used to apply optional ANSI styling to CLI text. */
+export interface Styler {
+    readonly arg: (text: string) => string;
+    readonly error: (text: string) => string;
+    readonly flag: (text: string) => string;
+    readonly heading: (text: string) => string;
+    readonly info: (text: string) => string;
+    readonly muted: (text: string) => string;
+    readonly ok: (text: string) => string;
+    readonly strong: (text: string) => string;
+}

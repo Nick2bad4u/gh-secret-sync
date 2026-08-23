@@ -1,6 +1,8 @@
+# Pull request
+
 ## Summary
 
-- Describe the change clearly and briefly.
+- Describe the change and its purpose.
 
 ## Validation
 

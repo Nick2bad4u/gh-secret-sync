@@ -1,17 +1,17 @@
-import type { Styler } from "./cli-types.js";
+import type { Styler } from "./cli-types.ts";
 
-type HelpOption = {
-    arg?: string;
-    description: string;
-    flag: string;
-};
+interface HelpOption {
+    readonly arg?: string;
+    readonly description: string;
+    readonly flag: string;
+}
 
-type HelpSection = {
-    options: HelpOption[];
-    title: string;
-};
+interface HelpSection {
+    readonly options: readonly HelpOption[];
+    readonly title: string;
+}
 
-const HELP_SECTIONS: HelpSection[] = [
+const HELP_SECTIONS: readonly HelpSection[] = [
     {
         options: [
             {
@@ -168,53 +168,43 @@ const HELP_EXAMPLES = [
     "gh secret-sync --plan-file ./secret-plan.csv --plan-format csv --confirm",
 ];
 
-function styleCommandExample(command: string, styler?: Styler): string {
-    if (!styler) {
-        return command;
-    }
-
-    return command
-        .split(/(\s+)/u)
-        .map((token) =>
-            token.startsWith("--")
-                ? styler.flag(token)
-                : token.startsWith("<") && token.endsWith(">")
-                  ? styler.arg(token)
-                  : token
-        )
-        .join("");
-}
-
+/** Build the complete help text, optionally applying terminal styling. */
 export function buildHelpText(styler?: Styler): string {
     const heading = (text: string): string =>
-        styler ? styler.info(text) : text;
-    const flag = (text: string): string => (styler ? styler.flag(text) : text);
-    const arg = (text: string): string => (styler ? styler.arg(text) : text);
+        styler === undefined ? text : styler.info(text);
+    const flag = (text: string): string =>
+        styler === undefined ? text : styler.flag(text);
+    const arg = (text: string): string =>
+        styler === undefined ? text : styler.arg(text);
     const title = (text: string): string =>
-        styler ? styler.heading(text) : text;
+        styler === undefined ? text : styler.heading(text);
 
     const maxLabelWidth = Math.max(
         ...HELP_SECTIONS.flatMap((section) =>
             section.options.map(
-                (option) =>
-                    `${option.flag}${option.arg ? ` ${option.arg}` : ""}`.length
+                (option) => formatPlainOptionLabel(option).length
             )
         ),
         0
     );
 
-    const lines: string[] = [];
-    lines.push(title("gh-secret-sync"));
-    lines.push("");
-    lines.push(heading("Usage"));
-    lines.push(`  gh secret-sync [options]`);
-    lines.push("");
+    const lines: string[] = [
+        title("gh-secret-sync"),
+        "",
+        heading("Usage"),
+        "  gh secret-sync [options]",
+        "",
+    ];
 
     for (const section of HELP_SECTIONS) {
         lines.push(title(section.title));
         for (const option of section.options) {
-            const label = `${flag(option.flag)}${option.arg ? ` ${arg(option.arg)}` : ""}`;
-            const plainLabel = `${option.flag}${option.arg ? ` ${option.arg}` : ""}`;
+            const renderedArgument =
+                option.arg === undefined ? "" : ` ${arg(option.arg)}`;
+            const plainArgument =
+                option.arg === undefined ? "" : ` ${option.arg}`;
+            const label = `${flag(option.flag)}${renderedArgument}`;
+            const plainLabel = `${option.flag}${plainArgument}`;
             const padding = " ".repeat(
                 Math.max(1, maxLabelWidth - plainLabel.length + 2)
             );
@@ -223,24 +213,18 @@ export function buildHelpText(styler?: Styler): string {
         lines.push("");
     }
 
-    lines.push(heading("Plan file format (JSON)"));
     lines.push(
-        '  [ { "target": "repo"|"env"|"org", "repo"?: "owner/name", "environment"?: "prod",'
+        heading("Plan file format (JSON)"),
+        '  [ { "target": "repo"|"env"|"org", "repo"?: "owner/name", "environment"?: "prod",',
+        '      "org"?: "my-org", "secret": "NAME", "value": "secret", "selectedRepos"?: ["owner/repo"] } ]',
+        "",
+        heading("Plan file format (CSV)"),
+        "  target,repo,environment,org,secret,value,visibility,selectedRepos",
+        '  env,owner/repo,production,,API_KEY,"value",,"owner/repo-a|owner/repo-b"',
+        "",
+        heading("Examples")
     );
-    lines.push(
-        '      "org"?: "my-org", "secret": "NAME", "value": "secret", "selectedRepos"?: ["owner/repo"] } ]'
-    );
-    lines.push("");
-    lines.push(heading("Plan file format (CSV)"));
-    lines.push(
-        "  target,repo,environment,org,secret,value,visibility,selectedRepos"
-    );
-    lines.push(
-        '  env,owner/repo,production,,API_KEY,"value",,"owner/repo-a|owner/repo-b"'
-    );
-    lines.push("");
 
-    lines.push(heading("Examples"));
     for (const example of HELP_EXAMPLES) {
         lines.push(`  ${styleCommandExample(example, styler)}`);
     }
@@ -248,10 +232,27 @@ export function buildHelpText(styler?: Styler): string {
     return lines.join("\n");
 }
 
+/** Build help text for callers that use the historical print helper. */
+export function printHelp(styler?: Styler): string {
+    return buildHelpText(styler);
+}
+
+/** Build help text for callers that render it through their own output layer. */
 export function renderHelpText(styler?: Styler): string {
     return buildHelpText(styler);
 }
 
-export function printHelp(styler?: Styler): string {
-    return buildHelpText(styler);
+function formatPlainOptionLabel(option: HelpOption): string {
+    const argument = option.arg === undefined ? "" : ` ${option.arg}`;
+    return `${option.flag}${argument}`;
+}
+
+function styleCommandExample(command: string, styler?: Styler): string {
+    if (styler === undefined) {
+        return command;
+    }
+
+    return command.replaceAll(/\S+/gv, (token) =>
+        token.startsWith("--") ? styler.flag(token) : token
+    );
 }

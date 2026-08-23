@@ -1,90 +1,112 @@
-import js from "@eslint/js";
-import globals from "globals";
-import tseslint from "typescript-eslint";
-
 import { createConfig } from "eslint-config-nick2bad4u";
 
-const codeFiles = ["**/*.{js,mjs,cjs,ts,mts,cts,tsx}"];
-const sharedConfig = createConfig();
-const sharedRulesOff = Object.fromEntries(
-    sharedConfig.flatMap((config) =>
-        Object.keys(config.rules ?? {}).map((ruleName) => [ruleName, "off"])
-    )
-);
-
-export default [
-    {
-        ignores: [
-            "dist/**",
-            "node_modules/**",
-            "temp/**",
-            ".cache/**",
+/** @type {import("eslint").Linter.Config[]} */
+const config = [
+    ...createConfig({
+        allowDefaultProjectFilePatterns: [
+            "*.{js,mjs,cjs}",
+            ".*.{js,mjs,cjs}",
+            "scripts/*.mjs",
+            "stylelint.config.mjs",
         ],
-    },
-    ...sharedConfig,
+        plugins: {
+            "docusaurus-2": false,
+            typefest: false,
+        },
+        tsconfigPaths: ["./tsconfig.json"],
+    }),
     {
-        name: "Preserve the repository's established ESLint rule contract",
-        rules: sharedRulesOff,
-    },
-    {
-        ...js.configs.recommended,
-        files: codeFiles,
-    },
-    ...tseslint.configs.strict.map((config) => ({
-        ...config,
-        files: codeFiles,
-    })),
-    ...tseslint.configs.strictTypeChecked.map((config) => ({
-        ...config,
-        files: codeFiles,
-    })),
-    {
-        files: ["**/*.{ts,mts,cts,tsx}"],
-        languageOptions: {
-            parserOptions: {
-                projectService: true,
-                tsconfigRootDir: import.meta.dirname,
-            },
+        name: "Repository policy exceptions",
+        rules: {
+            "repo-compliance/require-secret-scanning-config": "off",
         },
     },
     {
-        files: ["**/*.{ts,mts,cts,tsx}"],
+        files: ["package.json"],
+        name: "Validate package metadata without remote SchemaStore resolution",
         rules: {
-            "@typescript-eslint/consistent-type-definitions": ["error", "type"],
-            "@typescript-eslint/no-confusing-void-expression": "error",
-            "@typescript-eslint/no-unnecessary-condition": "error",
-            "@typescript-eslint/no-unnecessary-template-expression": "error",
-            "@typescript-eslint/restrict-template-expressions": [
-                "error",
-                {
-                    allowAny: false,
-                    allowBoolean: true,
-                    allowNullish: false,
-                    allowNumber: true,
-                    allowRegExp: false,
-                },
-            ],
+            "json-schema-validator-2/no-invalid": "off",
+        },
+    },
+    {
+        files: ["**/*.ts"],
+        name: "Require native Node TypeScript import extensions",
+        rules: {
+            "import-x/extensions": "off",
+        },
+    },
+    {
+        files: ["**/*.html"],
+        name: "Defer self-closing tag spacing to Prettier",
+        rules: {
+            "@html-eslint/no-extra-spacing-tags": "off",
+        },
+    },
+    {
+        files: ["src/**/*.ts"],
+        name: "Allow the CLI runtime to write user-facing output",
+        rules: {
+            "no-console": "off",
+            "unicorn/prefer-error-is-error": "off",
+        },
+    },
+    {
+        files: ["src/cli-styling.ts"],
+        name: "Allow terminal behavior to honor standard environment variables",
+        rules: {
+            "n/no-process-env": "off",
+        },
+    },
+    {
+        files: ["src/cli-gh.ts"],
+        name: "Allow the synchronous GitHub CLI process boundary",
+        rules: {
+            "n/no-process-env": "off",
+            "n/no-sync": "off",
+        },
+    },
+    {
+        files: ["src/cli.ts"],
+        name: "Allow the executable module to export its testable entry point",
+        rules: {
+            "n/no-process-env": "off",
+            "n/no-sync": "off",
+            // Keep execution helpers grouped by control flow; alphabetic sorting
+            // creates circular auto-fixes and obscures the CLI's safety sequence.
+            "perfectionist/sort-modules": "off",
+            // Paths are explicit CLI inputs for secret and plan files.
+            "security/detect-non-literal-fs-filename": "off",
+            "unicorn/no-exports-in-scripts": "off",
+        },
+    },
+    {
+        files: ["scripts/**/*.{js,mjs,ts,mts}"],
+        name: "Allow controlled repository maintenance script boundaries",
+        rules: {
+            "n/no-process-env": "off",
+            "n/no-sync": "off",
+            "no-console": "off",
+            "security/detect-non-literal-fs-filename": "off",
+            "unicorn/prefer-error-is-error": "off",
         },
     },
     {
         files: ["test/**/*.ts"],
-        rules: { "@typescript-eslint/no-floating-promises": "off" },
-    },
-    {
-        ...tseslint.configs.disableTypeChecked,
-        files: ["**/*.{js,mjs,cjs}"],
-    },
-    {
-        files: ["**/*.{js,mjs,cjs}"],
-        languageOptions: {
-            ecmaVersion: "latest",
-            globals: {
-                ...globals.node,
-            },
-            sourceType: "module",
-        },
+        name: "Keep deterministic test fixtures and cleanup readable",
         rules: {
-            "no-console": "off",
+            "canonical/no-barrel-import": "off",
+            "sonarjs/no-undefined-assignment": "off",
+            "test-signal/no-duplicate-assertions": "off",
+            "test-signal/no-mock-call-only-tests": "off",
+            "test-signal/require-negative-path": "off",
+            "unicorn/prefer-temporal": "off",
+            "vitest/no-hooks": "off",
+            // Test-signal already requires real assertions; mandatory counts add churn.
+            "vitest/prefer-expect-assertions": "off",
+            "vitest/prefer-import-in-mock": "off",
+            "vitest/require-top-level-describe": "off",
         },
     },
 ];
+
+export default config;

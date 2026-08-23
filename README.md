@@ -15,7 +15,10 @@ gh extension install Nick2bad4u/gh-secret-sync
 ## Requirements
 
 - `gh` CLI installed and authenticated (`gh auth login`)
-- Node.js `>=22.18.0`
+- Node.js `^22.18.0`, `^24.0.0`, or `>=26.0.0`
+
+The extension resolves `gh` from `PATH`. Set `GH_PATH` to an existing absolute
+executable path only when an explicit override is needed.
 
 ## Safety model
 

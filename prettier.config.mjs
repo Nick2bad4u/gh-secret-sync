@@ -1,6 +1,6 @@
 import sharedConfig from "prettier-config-nick2bad4u";
 
-export default {
+const prettierConfig = {
     ...sharedConfig,
     overrides: sharedConfig.overrides?.map((override) => ({
         ...override,
@@ -11,3 +11,5 @@ export default {
     })),
     plugins: [...(sharedConfig.plugins ?? [])],
 };
+
+export default prettierConfig;
