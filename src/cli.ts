@@ -595,15 +595,13 @@ function isVisibility(value: string): value is
     return VISIBILITY_VALUES.has(value);
 }
 
-function loadPlanOperations(
+function readPlanSource(
     planFile: string,
-    options: ParsedOptions,
     isJsonOutput: boolean,
     styler: Styler
-): CliResult<readonly SecretOperation[]> {
-    let raw: string;
+): CliResult<string> {
     try {
-        raw = readUtf8File(planFile);
+        return succeed(readUtf8File(planFile));
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         return emitError(
@@ -612,6 +610,40 @@ function loadPlanOperations(
             isJsonOutput,
             styler
         );
+    }
+}
+
+function parsePlanSource(
+    raw: string,
+    planFile: string,
+    planFormat: PlanFormat,
+    isJsonOutput: boolean,
+    styler: Styler
+): CliResult<unknown> {
+    try {
+        return succeed(
+            planFormat === "json" ? JSON.parse(raw) : parseCsvPlan(raw)
+        );
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        return emitError(
+            `invalid ${planFormat.toUpperCase()} in --plan-file ${planFile}: ${message}`,
+            "validation_error",
+            isJsonOutput,
+            styler
+        );
+    }
+}
+
+function loadPlanOperations(
+    planFile: string,
+    options: ParsedOptions,
+    isJsonOutput: boolean,
+    styler: Styler
+): CliResult<readonly SecretOperation[]> {
+    const raw = readPlanSource(planFile, isJsonOutput, styler);
+    if (!raw.ok) {
+        return raw;
     }
 
     const planFormat = resolvePlanFormat(
@@ -624,21 +656,18 @@ function loadPlanOperations(
         return planFormat;
     }
 
-    let parsed: unknown;
-    try {
-        parsed =
-            planFormat.value === "json" ? JSON.parse(raw) : parseCsvPlan(raw);
-    } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        return emitError(
-            `invalid ${planFormat.value.toUpperCase()} in --plan-file ${planFile}: ${message}`,
-            "validation_error",
-            isJsonOutput,
-            styler
-        );
+    const parsed = parsePlanSource(
+        raw.value,
+        planFile,
+        planFormat.value,
+        isJsonOutput,
+        styler
+    );
+    if (!parsed.ok) {
+        return parsed;
     }
 
-    if (!isUnknownArray(parsed)) {
+    if (!isUnknownArray(parsed.value)) {
         return emitError(
             `--plan-file ${planFormat.value.toUpperCase()} must describe an array/list of operation records.`,
             "validation_error",
@@ -648,7 +677,7 @@ function loadPlanOperations(
     }
 
     const operations: SecretOperation[] = [];
-    for (const entry of parsed) {
+    for (const entry of parsed.value) {
         if (entry === null || typeof entry !== "object") {
             return emitError(
                 "plan file records must be objects.",

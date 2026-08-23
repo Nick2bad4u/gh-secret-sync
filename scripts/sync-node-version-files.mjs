@@ -14,6 +14,7 @@
 
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
+import { satisfies, validRange } from "semver";
 
 const packageJsonPath = fileURLToPath(
     new URL("../package.json", import.meta.url)
@@ -195,80 +196,46 @@ const readPackageJson = async () => {
 };
 
 /**
- * Extract the lowest exact version mentioned by the Node.js engine range.
+ * Read and validate the complete Node.js engine range.
  *
  * @param {unknown} enginesValue
  *
  * @returns {string | null}
  */
-const resolveMinimumEngineVersion = (enginesValue) => {
+const resolveNodeEngineRange = (enginesValue) => {
     if (!isRecord(enginesValue) || typeof enginesValue["node"] !== "string") {
         return null;
     }
 
     const nodeEngineRange = enginesValue["node"].trim();
-    const versions = nodeEngineRange
-        .matchAll(/\d{1,10}\.\d{1,10}\.\d{1,10}/gv)
-        .map(([version]) => version)
-        .toArray();
-    return (
-        versions.toSorted((left, right) =>
-            compareExactVersions(left, right)
-        )[0] ?? null
-    );
+    if (validRange(nodeEngineRange) === null) {
+        throw new TypeError(
+            `Expected package.json engines.node to contain a valid semver range, received: ${nodeEngineRange}`
+        );
+    }
+
+    return nodeEngineRange;
 };
 
 /**
- * Compare two exact semver versions.
- *
- * @param {string} leftVersion
- * @param {string} rightVersion
- *
- * @returns {number}
- */
-function compareExactVersions(leftVersion, rightVersion) {
-    const leftSegments = leftVersion.split(".").map(Number);
-    const rightSegments = rightVersion.split(".").map(Number);
-
-    for (
-        let index = 0;
-        index < Math.max(leftSegments.length, rightSegments.length);
-        index += 1
-    ) {
-        const leftSegment = leftSegments[index] ?? 0;
-        const rightSegment = rightSegments[index] ?? 0;
-
-        if (leftSegment !== rightSegment) {
-            return leftSegment - rightSegment;
-        }
-    }
-
-    return 0;
-}
-
-/**
- * Ensure the preferred version does not fall below the minimum supported
- * engine.
+ * Ensure the preferred version satisfies the complete supported engine range.
  *
  * @param {string} preferredVersion
- * @param {string | null} minimumEngineVersion
+ * @param {string | null} nodeEngineRange
  *
  * @returns {void}
  */
-const assertPreferredVersionSupported = (
-    preferredVersion,
-    minimumEngineVersion
-) => {
-    if (minimumEngineVersion === null) {
+const assertPreferredVersionSupported = (preferredVersion, nodeEngineRange) => {
+    if (nodeEngineRange === null) {
         return;
     }
 
-    if (compareExactVersions(preferredVersion, minimumEngineVersion) < 0) {
+    if (!satisfies(preferredVersion, nodeEngineRange)) {
         throw new RangeError(
             [
-                "Preferred Node.js version is below package.json engines.node.",
+                "Preferred Node.js version does not satisfy package.json engines.node.",
                 `Preferred: ${preferredVersion}.`,
-                `Minimum engine: ${minimumEngineVersion}.`,
+                `Supported range: ${nodeEngineRange}.`,
             ].join(" ")
         );
     }
@@ -369,13 +336,11 @@ const main = async () => {
         process.argv.slice(2)
     );
     const packageJson = await readPackageJson();
-    const minimumEngineVersion = resolveMinimumEngineVersion(
-        packageJson["engines"]
-    );
+    const nodeEngineRange = resolveNodeEngineRange(packageJson["engines"]);
     const preferredVersion =
         explicitVersion ?? normalizeNodeVersion(process.versions.node);
 
-    assertPreferredVersionSupported(preferredVersion, minimumEngineVersion);
+    assertPreferredVersionSupported(preferredVersion, nodeEngineRange);
 
     if (checkOnly) {
         await validateVersionFiles({ expectedVersion: null });
