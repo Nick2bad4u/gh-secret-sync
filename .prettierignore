@@ -20,6 +20,7 @@ docs/Guides/
 # MD and MDX files since we use Remark Lint and other tools for those
 
 # Ignore Change Logs
+CHANGELOG.md
 
 # Ignore package in electron-app
 electron-app/package.json
@@ -32,7 +33,8 @@ electron-app/package-lock.json
 
 # Ignore prompts (Changed " to ' for tools messes up agents)
 
-# Ignore Sonar properties (not compatible with prettier-ini parser)
+# Ignore Sonar properties (not compatible with Prettier)
+sonar.properties
 sonar-project.properties
 
 # covered by remark lint / remark
